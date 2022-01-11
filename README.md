@@ -2,7 +2,8 @@
 
 A simple CLI utility to create uniform commits.
 
-![](imgs/pycommit_logo.svg)
+![Py Commit Logo](imgs/pycommit_logo.svg#gh-dark-mode-only)
+![Py Commit Logo](imgs/pycommit_logo_light.svg#gh-light-mode-only)
 
 ![](https://img.shields.io/github/last-commit/Antoine-Meloche/PyCommit?style=for-the-badge)
 ![](https://img.shields.io/maintenance/yes/2022?style=for-the-badge)
