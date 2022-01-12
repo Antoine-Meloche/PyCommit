@@ -18,7 +18,7 @@ A simple CLI utility to create uniform commits.
     * [Commit Changes](#commit-staged-changes)
     * [Push commit](#push-commit-to-remote)
     * [All in one](#all-in-one)
-* [Installtion](#installation)
+* [Installation](#installation)
     * [Install from release](#install-from-releases)
         * [Linux](#linux-release)
         * [Windows](#windows-release)

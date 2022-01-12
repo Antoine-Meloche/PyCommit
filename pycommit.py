@@ -18,7 +18,9 @@ Copyright (C) 2022  Antoine Meloche
 """
 
 import os
+import sys
 from git import Repo
+from git.exc import GitCommandError
 
 print("""
 PyCommit  Copyright (C) 2022  Antoine Meloche
@@ -27,92 +29,186 @@ PyCommit  Copyright (C) 2022  Antoine Meloche
     under certain conditions. For details visit https://www.gnu.org/licenses/
 """)
 
-repo = Repo("./")
 
-if not repo.bare:
-    print(f"Repo loaded at {os.getcwd()}:")
-    print(f"    Description: {repo.description}")
-    print(f"    Active Branch: {repo.active_branch}")
-    for remote in repo.remotes:
-        print(f"    Remote '{remote}' at '{remote.url}'")
+class colors:
+    RED = "\033[91m"
+    RESETC = "\033[0m"
 
-    if repo.git.status("--short") == "":
-        print("No changes detected in working tree")
-        quit()
 
-    isAdd = input(
-        "\nShould all the changes be staged for the commit? [Y/n] ")
+class PyCommit:
+    path_to_repo = "./"
 
-    if (isAdd.lower() in ["", "y", "yes"]):
-        repo.git.add(".")
+    def __init__(self):
+        self.find_directory()
+        self.load_repo()
+
+    def find_directory(self):
+        if len(sys.argv) != 1:
+            try:
+                self.path_to_repo = sys.argv[sys.argv.index("-p")]
+            except ValueError:
+                pass
+
+    def load_repo(self):
+        self.repo = Repo(self.path_to_repo)
+
+        if not self.repo.bare:
+            print(f"Repo loaded at {self.path_to_repo}:")
+            print(f"    Description: {self.repo.description}")
+            print(f"    Active Branch: {self.repo.active_branch}")
+            for remote in self.repo.remotes:
+                print(f"    Remote '{remote}' at '{remote.url}'")
+
+            if self.repo.git.status("--short") == "":
+                print(
+                    f"{colors.RED}ERROR: No changes detected in working tree{colors.RESETC}")
+                sys.exit(1)
+
+    def stage_changes(self):
+        self.repo.git.add(".")
         print("  ➜ Changes staged")
 
-    print("""
-[1] BUGFIX: fixed a bug
-[2] FEAT: added a feature
-[3] REFAC: code refactoring
-[4] DOCS: change to documentation only
-[5] STYLE: change to formatting only
-[6] TEST: change, addition to tests only
-[7] Custom
+    def verify_staged(self):
+        if self.repo.git.diff("--cached", "--shortstat") == "":
+            print(f"{colors.RED}ERROR: No changes are currently staged")
+            sys.exit(1)
+
+    def commit_message(self):
+        print("""
+    [1] BUGFIX: fixed a bug
+    [2] FEAT: added a feature
+    [3] REFAC: code refactoring
+    [4] DOCS: change to documentation only
+    [5] STYLE: change to formatting only
+    [6] TEST: change, addition to tests only
+    [7] Custom
     """)
-    commitTypes = ["", "BUGFIX: ", "FEAT: ", "REFAC: ", "DOCS: ", "STYLE: ", "TEST: "]
+        commitTypeChoice = input(
+            "Which corresponds to the type of your commit: ")
 
-    commitTypeChoice = input("Which corresponds to the type of your commit: ")
-    try:
-        int(commitTypeChoice)
-    except:
-        print("Input was not a number")
-        quit()
-
-    if commitTypeChoice == "7":
-        title = input("Title: ")
-    else:
-        print("Enter your title:")
-        title = commitTypes[int(commitTypeChoice)]+input(f"{commitTypes[int(commitTypeChoice)]}")
-
-    body = input("Enter the body of your commit (optional): ")
-
-    print(f"""
-{title}
-    {body}
-author: {repo.git.config("--get", "user.name")}
-email: {repo.git.config("--get", "user.email")}
-    """)
-
-    isReviewed = input("Are the information fields correct? [Y/n] ")
-
-    if (isReviewed.lower() not in ["", "y", "yes"]):
-        print("Commit cancelled")
-        quit()
-
-    repo.git.commit("-m", title, "-m", body)
-    print("  ➜ Commited")
-
-    isPush = input("Do you want this commit to be pushed to a remote? [Y/n] ")
-
-    if (isReviewed.lower() not in ["", "y", "yes"]):
-        print("Push cancelled")
-        quit()
-
-    if len(repo.remotes) == 0:
-        print("Pushing to remote is impossible, no remote located")
-        quit()
-
-    if len(repo.remotes) > 1:
-        for i in range(len(repo.remotes)):
-            print(f"[{i}]: {repo.remotes[i]} at {repo.remotes[i].url}")
         try:
-            remote = repo.remotes[int(input("Which remote would you like to choose: "))]
+            int(commitTypeChoice)
         except:
-            print("Input was not a number")
-            quit()
+            print(f"{colors.RED}ERROR: Input was not a number{colors.RESETC}")
+            sys.exit(1)
+
+        commitTypes = ["", "BUGFIX: ", "FEAT: ",
+                       "REFAC: ", "DOCS: ", "STYLE: ", "TEST: "]
+
+        if commitTypeChoice == "7":
+            self.title = input("Title: ")
+        else:
+            print("Enter your title:")
+            self.title = commitTypes[int(commitTypeChoice)] + \
+                input(f"{commitTypes[int(commitTypeChoice)]}")
+
+        self.body = input("Enter the body of your commit (optional): ")
+
+    def commit_verif(self):
+        print(f"""
+    {self.title}
+        {self.body}
+    author: {self.repo.git.config("--get", "user.name")}
+    email: {self.repo.git.config("--get", "user.email")}
+    """)
+        isReviewed = input("Are the information fields correct? [Y/n] ")
+
+        if (isReviewed.lower() not in ["", "y", "yes"]):
+            print(f"{colors.RED}Commit cancelled{colors.RESETC}")
+            sys.exit(1)
+
+    def commit(self):
+        self.repo.git.commit("-m", self.title, "-m", self.body)
+        print("  ➜ Commited")
+
+    def choose_remote(self):
+        if len(self.repo.remotes) == 0:
+            print(
+                f"{colors.RED}ERROR: Pushing to remote is impossible; no remote located{colors.RESETC}")
+
+        if len(self.repo.remotes) > 1:
+            for i in range(len(self.repo.remotes)):
+                print(
+                    f"[{i}]: {self.repo.remotes[i]} at {self.repo.remotes[i].url}")
+
+            try:
+                self.remote = self.repo.remotes[int(
+                    input("Which remote would you like to push to: "))]
+            except ValueError:
+                print(f"{colors.RED}ERROR: Input was not a number{colors.RESETC}")
+                sys.exit(1)
+        else:
+            self.remote = self.repo.remotes[0]
+
+    def push(self):
+        try:
+            self.repo.git.push("-u", self.remote, self.repo.active_branch)
+        except GitCommandError:
+            print(
+                f"{colors.RED}ERROR: Remote repository is offline or does not exist{colors.RESETC}")
+        print(f"  ➜ Pushed to {self.remote} at {self.remote.url}")
+
+    def all(self):
+        self.stage_changes()
+        self.commit_message()
+        self.commit_verif()
+        self.commit()
+        self.choose_remote()
+        self.push()
+
+    def add(self):
+        self.stage_changes()
+
+    def commit_only(self):
+        self.verify_staged()
+        self.commit_message()
+        self.commit()
+
+    def push_only(self):
+        self.choose_remote()
+        self.push
+
+
+if __name__ == "__main__":
+    pycommit = PyCommit()
+    if len(sys.argv) == 1:
+        pycommit.all()
+    elif len(sys.argv) == 2:
+        with sys.argv[1] as arg:
+            if arg == ("a" or "add"):
+                pycommit.add()
+            elif arg == ("c" or "commit"):
+                pycommit.commit_only()
+            elif arg == ("p" or "push"):
+                pycommit.push_only()
+            else:
+                args = arg.split('')
+                for arg in args:
+                    if arg == "a":
+                        pycommit.add()
+                    elif arg == "c":
+                        pycommit.commit_only()
+                    elif arg == "p":
+                        pycommit.push_only()
+                    else:
+                        print(
+                            f"{colors.RED}ERROR: Invalid argument: {sys.argv[1]}{colors.RESETC}")
+                        sys.exit(1)
     else:
-        remote = repo.remotes[0]
-    
-    repo.git.push("-u", remote, repo.active_branch)
-    print(f"  ➜ Pushed to {remote} at {remote.url}")
+        for arg in sys.argv[1:]:
+            if arg == ("a" or "add"):
+                pycommit.add()
+            elif arg == ("c" or "commit"):
+                pycommit.commit_only()
+            elif arg == ("p" or "push"):
+                pycommit.push_only()
+            else:
+                try:
+                    p_index = sys.argv.index("-p")
+                except IndexError:
+                    pass
 
-else:
-    print(f"could not load repository in current directory: {os.getcwd()}")
-
+                if arg != ("p" or sys.argv[p_index+1]):
+                    print(
+                        f"{colors.RED}ERROR: Invalid argument: {arg}{colors.RESETC}")
+                    sys.exit(1)
