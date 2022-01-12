@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+title: PyCommit
+message: 'Please use the below information to cite this software'
+type: software
+authors:
+  - given-names: Antoine
+    family-names: Meloche
+    email: antmeloche@gmail.com
+    orcid: 'https://orcid.org/0000-0001-7126-0051'
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.5842463
+repository-code: 'https://github.com/Antoine-Meloche/PyCommit.git'
+url: 'https://github.com/Antoine-Meloche/PyCommit'
+abstract: A simple CLI utility to create uniform commits
+keywords:
+  - python
+  - git
+  - commit
+license: GPL-3.0
