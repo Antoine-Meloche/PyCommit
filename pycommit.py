@@ -171,7 +171,7 @@ class PyCommit:
 
 if __name__ == "__main__":
     pycommit = PyCommit()
-    if len(sys.argv) == 1:
+    if len(sys.argv) == 1 or (len(sys.argv) == 3 and sys.argv.contains("-p")):
         pycommit.all()
     elif len(sys.argv) == 2:
         with sys.argv[1] as arg:
