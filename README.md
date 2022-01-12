@@ -58,6 +58,11 @@ or
 PyCommit equivalent to 'git add . && git commit -m "Title" -m "Message" && git push -u "remote" "branch"'
 
     pycommit
+---
+### Changing path of repo
+PyCommit command argument '-p' is used to load a repo that is not in the current running directory.
+
+    pycommit -p /path/to/repo
 
 # Installation
 
