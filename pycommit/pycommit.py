@@ -20,14 +20,8 @@ Copyright (C) 2022  Antoine Meloche
 import os
 import sys
 from git import Repo
-from git.exc import GitCommandError
+from git.exc import GitCommandError, InvalidGitRepositoryError
 
-print("""
-PyCommit  Copyright (C) 2022  Antoine Meloche
-    This program comes with ABSOLUTELY NO WARRANTY;
-    This is free software, and you are welcome to redistribute it
-    under certain conditions. For details visit https://www.gnu.org/licenses/
-""")
 
 
 class colors:
@@ -39,6 +33,12 @@ class PyCommit:
     path_to_repo = "./"
 
     def __init__(self):
+        print("""
+        PyCommit  Copyright (C) 2022  Antoine Meloche
+            This program comes with ABSOLUTELY NO WARRANTY;
+            This is free software, and you are welcome to redistribute it
+            under certain conditions. For details visit https://www.gnu.org/licenses/
+        """)
         self.find_directory()
         self.load_repo()
 
@@ -50,7 +50,10 @@ class PyCommit:
                 pass
 
     def load_repo(self):
-        self.repo = Repo(self.path_to_repo)
+        try:
+            self.repo = Repo(self.path_to_repo)
+        except InvalidGitRepositoryError:
+            print(f"{colors.RED}ERROR: Invalid git repository{colors.RESETC}")
 
         if not self.repo.bare:
             print(f"Repo loaded at {self.path_to_repo}:")
