@@ -81,11 +81,13 @@ Available packages:
 |    AppImage    |   ✘   |
 |      Snap      |   ✘   |
 
-For more information visit the [Linux Releases Wiki Page](https://github.com/Antoine-Meloche/PyCommit/Wiki)
+For more information visit the [Linux Releases Wiki Page](https://github.com/Antoine-Meloche/PyCommit/wiki/Installation#linux)
 
-### Windows release
+### Pip release
 
-### Mac release
+```
+python -m pip install gitpython PyCommit
+```
 
 ## Install from source
 
