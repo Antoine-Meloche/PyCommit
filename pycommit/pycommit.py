@@ -17,7 +17,6 @@ Copyright (C) 2022  Antoine Meloche
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-import os
 import sys
 from git import Repo
 from git.exc import GitCommandError, InvalidGitRepositoryError
